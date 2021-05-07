@@ -16,18 +16,32 @@ for file in "messages/"*
 do
 
     if [ -d "$file" ]; then
-        echo -e "Processing chat folder "$file
-        mkdir "$file/images"
+        echo -e "   Processing chat folder $file"
+        if [ -d "$file/images" ] 
+            then
+                echo "   Images folder already exist. I'm gonna save there."
+            else
+                echo "   Images folder not exist. Creating..."
+                mkdir "$file/images"
+        fi
+
         for chat in "$file"/*
         do
-            echo "Parsing chat file "$chat
-            images=($(cat $chat | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%&:-]*" | sort -u | grep jpg))
-            for img in $images
-            do
-                curl $img --output $file/images/$RANDOM.jpg --silent
-            done
+            if [ -f "$chat" ] 
+                then
+                    echo "   Parsing chat file $chat"
+                    images=($(cat "$chat" | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%&:-]*" | sort -u | grep jpg))
+                    for img in "${images[@]}"
+                    do
+                        imageName=$RANDOM
+                        echo "      Saving image: $imageName"
+                        curl "$img" --output "$file"/images/"$imageName".jpg --silent
+                    done
+            fi
         done
 
     fi
+
+    echo "Done."
 
 done
